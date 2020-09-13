@@ -1,6 +1,11 @@
 {
-  "bot": {
-	"prefix": "-"
-  },
-  "modules": {}
+    "bot": {
+        "prefix": "\\"
+    },
+    "modules": {
+        "test": [
+            350938367405457408,
+            "./modules/test.py"
+        ]
+    }
 }

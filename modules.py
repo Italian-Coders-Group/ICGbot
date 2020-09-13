@@ -20,7 +20,7 @@ class Modules:
 		with open('./options', 'r') as file:
 			data = json.load(file)
 		Modules.savedata = data['modules']
-		for name, mod in Modules.savedata:
+		for name, mod in Modules.savedata.items():
 			Modules.modules[name] = [ mod[0], getModule( name, mod[1] ) ]
 
 	async def mhandle(self, message: Message):
@@ -54,7 +54,8 @@ class Modules:
 			del self.modules[ cmd[1] ]
 			del self.savedata[ cmd[1] ]
 			await message.channel.send(f'removed module "{cmd[1]}"')
-		# list all modules
+
+		# list modules
 		elif cmd[0] == 'list':
 			modules = []
 			if len( cmd ) < 2:
@@ -62,9 +63,21 @@ class Modules:
 			elif cmd[1] == 'all':
 				for name, value in self.modules.items():
 					modules.append(f'{name} by {message.channel.guild.get_member(value[0])}')
+				if len( modules ) == 0:
+					modules.append('no modules found')
 				await message.channel.send( embed=utils.embed( 'Module List', '/n'.join(modules), discord.Color.blue() ) )
 			else:
-				
+				if ( len( message.mentions ) == 0 ) or ( len( message.mentions ) > 1 ):
+					await message.channel.send(f'should have as parameter exactly ONE mention or "all"')
+				else:
+					user = message.mentions[0]
+					for name, value in self.modules.items():
+						if value[0] == user.id:
+							modules.append(f'{name} by {user}')
+					if len(modules) == 0:
+						modules.append('no modules found')
+					await message.channel.send( embed=utils.embed( 'Module List', '/n'.join(modules), discord.Color.blue() ) )
+
 		else:
 			# attachment check
 			if (len(message.attachments) == 0) or (message.attachments is None):
@@ -110,6 +123,14 @@ class Modules:
 				self.modules[cmd[1]] = [message.author.id, module]
 				self.savedata[cmd[1]] = [message.author.id, path]
 				await message.channel.send(f'module "{cmd[1]}" successfully added')
+
+			with open('./options', 'r') as file:
+				data = json.load(file)
+			# update with new data
+			data['modules'] = self.savedata
+			# write options
+			with open('./options', 'w') as file:
+				json.dump(data, file, indent=4)
 
 	async def handle(self, msg: Message):
 		cmd = msg.content.split(' ')[0]

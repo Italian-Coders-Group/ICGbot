@@ -1,3 +1,5 @@
+import json
+
 from discord import Message
 
 
@@ -14,8 +16,19 @@ class Commands:
 			pre = self.bot.prefix
 			self.bot.prefix = msg.content.strip()
 			await msg.channel.send(f'successfully changed prefix from "{pre}" to "{self.bot.prefix}"')
+			# save changes
+			with open('./options', 'r') as file:
+				data = json.load(file)
+			# update with new data
+			data['bot']['prefix'] = self.bot.prefix
+			# write options
+			with open('./options', 'w') as file:
+				json.dump(data, file, indent=4)
 		else:
 			await msg.channel.send(f'the new prefix must be 1 char long, the provided prefix is {len(msg.content)}')
 
 	async def whatsmyid(self, msg: Message):
 		await msg.channel.send( msg.author.id )
+
+	async def breaker(self, msg: Message):
+		print('break!')
