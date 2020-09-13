@@ -18,6 +18,7 @@ class Bot:
 	prefix: str = '!'
 	module = None
 	stdCommands = None
+	lastReload: str = None
 
 	def __init__(self):
 		# load saved data
@@ -36,6 +37,7 @@ class Bot:
 		Bot.stdCommands.bot = self
 
 	async def on_ready(self):
+		await self.client.get_guild(500396398324350989).me.edit(nick=f'[{self.prefix}] ICGbot')
 		print(f'discord.py v{discord.__version__}')
 		print(f'We have logged in as {self.client.user}')
 
@@ -52,14 +54,6 @@ class Bot:
 			await self.reload(msg)
 		elif msg.content.startswith('module'):
 			await self.module.mhandle(msg)
-		elif msg.content.startswith('quit'):
-			if msg.author.id == utils.enderzombi:
-				try:
-					Quit()
-				except:
-					pass
-			else:
-				await msg.channel.send('only ENDERZOMBI102 can use that command')
 		else:
 			await self.handleCommand(msg)
 
@@ -69,9 +63,10 @@ class Bot:
 			await msg.channel.send('only ENDERZOMBI102 can do that')
 			return
 		module: str = msg.content.replace('reload', '', 1).strip()
-		if not len( module ) > 0:
+		if ( not len( module ) > 0 ) and ( self.lastReload is None) :
 			await msg.channel.send('missing parameter')
 			return
+		self.lastReload = module
 		await msg.channel.send(f'reloading module "{module}"')
 		if module in self.module.modules.keys():
 			try:
@@ -108,6 +103,9 @@ class Bot:
 				else:
 					self.stdCommands = commands.Commands()
 					self.stdCommands.bot = self
+			else:
+				await utils.send(msg, 'invalid module "{module}"')
+				return
 			await msg.channel.send(f'bot module "{module}" reloaded')
 
 	async def handleCommand(self, msg: Message):

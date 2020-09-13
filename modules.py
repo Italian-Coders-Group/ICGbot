@@ -31,7 +31,11 @@ class Modules:
 			cmd.remove('s')
 		if cmd[0] == '':
 			del cmd[0]
-		if cmd[0] == 'remove':
+		if len( cmd ) == 0:
+			await message.channel.send(
+				f'missing subcommand, subcommands available: add, update, remove, list'
+			)
+		elif cmd[0] == 'remove':
 			# parameter check
 			if len( cmd ) < 2:
 				await message.channel.send(
@@ -73,10 +77,10 @@ class Modules:
 					user = message.mentions[0]
 					for name, value in self.modules.items():
 						if value[0] == user.id:
-							modules.append(f'{name} by {user}')
+							modules.append(name)
 					if len(modules) == 0:
 						modules.append('no modules found')
-					await message.channel.send( embed=utils.embed( 'Module List', '/n'.join(modules), discord.Color.blue() ) )
+					await message.channel.send( embed=utils.embed( f'Modules Made By {user}', '/n'.join(modules), discord.Color.blue() ) )
 
 		else:
 			# attachment check
