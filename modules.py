@@ -83,8 +83,11 @@ class Modules:
 					await message.channel.send( embed=utils.embed( f'Modules Made By {user}', '/n'.join(modules), discord.Color.blue() ) )
 
 		else:
+
+			isCodeBlock: bool = message.content.find("'''python") == -1
+
 			# attachment check
-			if (len(message.attachments) == 0) or (message.attachments is None):
+			if ( ( len(message.attachments) == 0) or (message.attachments is None) ) and ( not isCodeBlock ):
 				await message.channel.send('missing module (.py) file')
 				return
 
@@ -97,8 +100,14 @@ class Modules:
 				if cmd[1] in self.modules.keys():
 					await message.channel.send(f'module "{cmd[1]}" already exist! use module update to update it')
 					return
-				path = f'./modules/{message.attachments[0].filename}'
-				await message.attachments[0].save(path)
+				path = f'./modules/{message.attachments[0].filename if not isCodeBlock else cmd[1].replace(" ","")+".py"}'
+				if isCodeBlock:
+					code: str = message.content.replace(f'{self.bot.prefix}module add {cmd[1]}')
+					code = code.replace("'''python", '').replace("'''", '')
+					with open(path, 'x') as file:
+						file.write(code)
+				else:
+					await message.attachments[0].save(path)
 				try:
 					module = getModule( cmd[0], path )
 				except Exception as e:
@@ -117,8 +126,14 @@ class Modules:
 				if cmd[1] not in self.modules.keys():
 					await message.channel.send(f'module "{cmd[1]}" does not exist! use module add to add it')
 					return
-				path = f'./modules/{message.attachments[0].filename}'
-				await message.attachments[0].save(path)
+				path = f'./modules/{message.attachments[0].filename if not isCodeBlock else cmd[1].replace(" ","")+".py"}'
+				if isCodeBlock:
+					code: str = message.content.replace(f'{self.bot.prefix}module add {cmd[1]}')
+					code = code.replace("'''python", '').replace("'''", '')
+					with open(path, 'w') as file:
+						file.write(code)
+				else:
+					await message.attachments[0].save(path)
 				try:
 					module = getModule(cmd[0], path)
 				except Exception as e:
