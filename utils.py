@@ -1,11 +1,14 @@
 import discord
 import traceback
-from typing import Final, Union
+from typing import Union
 
 from discord import Message, Embed
 
 inviteLink: str = discord.utils.oauth_url( '754402963971113010', discord.abc.Permissions( 70569024 ) )
-enderzombi: Final[int] = 350938367405457408
+
+
+def enderzombi() -> int:
+	return 350938367405457408
 
 
 def embed(title: str, content: str, color: discord.Color) -> Embed:
