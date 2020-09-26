@@ -59,7 +59,7 @@ class Bot:
 
 	async def reload(self, msg: Message):
 		# user check
-		if not msg.author.id == utils.enderzombi:
+		if not msg.author.id == utils.enderzombi():
 			await msg.channel.send('only ENDERZOMBI102 can do that')
 			return
 		module: str = msg.content.replace('reload', '', 1).strip()

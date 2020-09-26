@@ -36,13 +36,13 @@ class Commands:
 		await utils.send( msg, msg.author.id )
 
 	async def breaker(self, msg: Message):
-		if msg.author.id != utils.enderzombi:
+		if msg.author.id != utils.enderzombi():
 			await utils.send(msg, 'only ENDERZOMBI102 can use that command')
 			return
 		print('break!')
 
 	async def setActivity(self, msg: Message):
-		if msg.author.id != utils.enderzombi:
+		if msg.author.id != utils.enderzombi():
 			await utils.send(msg, 'only ENDERZOMBI102 can use that command')
 			return
 		act = discord.Game( msg.content.replace('setActivity ', '', 1) )
