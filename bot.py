@@ -112,7 +112,11 @@ class Bot:
 		await getattr(self.stdCommands, msg.content.split(' ')[0], self.module.handle)(msg)
 
 	def run(self):
-		self.client.run( os.getenv('TOKEN') )
+		token = os.getenv('TOKEN')
+		if token is None:
+			with open('./.env', 'r') as file:
+				token = file.read().replace('TOKEN=', '', 1)
+		self.client.run(token)
 
 	def __delete__(self, instance):
 		with open('./options', 'w') as file:
