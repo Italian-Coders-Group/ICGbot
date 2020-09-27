@@ -63,16 +63,20 @@ class Bot:
 			await msg.channel.send('only ENDERZOMBI102 can do that')
 			return
 		module: str = msg.content.replace('reload', '', 1).strip()
-		if ( not len( module ) > 0 ) and ( self.lastReload is None) :
-			await msg.channel.send('missing parameter')
-			return
+		if not len( module ) > 0:
+			if self.lastReload is None:
+				await msg.channel.send('missing parameter')
+				return
+			else:
+				module = self.lastReload
 		self.lastReload = module
 		await msg.channel.send(f'reloading module "{module}"')
 		if module in self.module.modules.keys():
 			try:
-				importlib.reload( self.modules[module] )
+				await self.module.reload(module)
 			except Exception as e:
 				await msg.channel.send( embed=utils.getTracebackEmbed(e) )
+				raise e
 			else:
 				await msg.channel.send(f'custom module "{module}" reloaded')
 		else:
