@@ -2,3 +2,4 @@
 modules
 .env
 options
+__pycache__/
