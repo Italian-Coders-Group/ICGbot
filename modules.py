@@ -19,8 +19,10 @@ class Modules:
 	def __init__(self):
 		with open('./options', 'r') as file:
 			data = json.load(file)
+		# get the saved modules
 		Modules.savedata = data['modules']
 		for name, mod in Modules.savedata.items():
+			print(name+' '+mod[1])
 			Modules.modules[name] = [ mod[0], getModule( name, mod[1] ) ]
 
 	async def mhandle(self, message: Message):
@@ -84,28 +86,31 @@ class Modules:
 
 		else:
 
-			isCodeBlock: bool = message.content.find("'''python") == -1
+			isCodeBlock: bool = not message.content.find("```python") == -1
 
 			# attachment check
 			if ( ( len(message.attachments) == 0) or (message.attachments is None) ) and ( not isCodeBlock ):
 				await message.channel.send('missing module (.py) file')
 				return
+			# module name check
+			if len(cmd) < 2:
+				await message.channel.send(f'missing parameter <modulename>.')
+				return
+			# create needed variables
+			modulename: str = cmd[1]
+			if '\n' in modulename:
+				modulename = modulename.split('\n')[0]
+			path = f'./modules/{message.attachments[0].filename if not isCodeBlock else modulename + ".py"}'
 
 			if cmd[0] == 'add':
 				# parameter check
-				if len( cmd ) < 2:
-					await message.channel.send(f'missing parameter <modulename>.')
-					return
+
 				# exist check
-				if cmd[1] in self.modules.keys():
-					await message.channel.send(f'module "{cmd[1]}" already exist! use module update to update it')
+				if modulename in self.modules.keys():
+					await message.channel.send(f'module "{modulename}" already exist! use module update to update it')
 					return
-				path = f'./modules/{message.attachments[0].filename if not isCodeBlock else cmd[1].replace(" ","")+".py"}'
 				if isCodeBlock:
-					code: str = message.content.replace(f'{self.bot.prefix}module add {cmd[1]}')
-					code = code.replace("'''python", '').replace("'''", '')
-					with open(path, 'x') as file:
-						file.write(code)
+					saveCodeBlock(message, path, modulename, 'x')
 				else:
 					await message.attachments[0].save(path)
 				try:
@@ -113,9 +118,9 @@ class Modules:
 				except Exception as e:
 					await message.channel.send( embed=utils.getTracebackEmbed(e) )
 					return
-				self.modules[ cmd[1] ] = [ message.author.id, module ]
-				self.savedata[ cmd[1] ] = [ message.author.id, path]
-				await message.channel.send(f'module "{cmd[1]}" successfully added')
+				self.modules[ modulename ] = [ message.author.id, module ]
+				self.savedata[ modulename ] = [ message.author.id, path]
+				await message.channel.send(f'module "{modulename}" successfully added')
 
 			elif cmd[0] == 'update':
 				# parameter check
@@ -123,15 +128,11 @@ class Modules:
 					await message.channel.send(f'missing parameter <modulename>.')
 					return
 				# exist check
-				if cmd[1] not in self.modules.keys():
-					await message.channel.send(f'module "{cmd[1]}" does not exist! use module add to add it')
+				if modulename not in self.modules.keys():
+					await message.channel.send(f'module "{modulename}" does not exist! use module add to add it')
 					return
-				path = f'./modules/{message.attachments[0].filename if not isCodeBlock else cmd[1].replace(" ","")+".py"}'
 				if isCodeBlock:
-					code: str = message.content.replace(f'{self.bot.prefix}module add {cmd[1]}')
-					code = code.replace("'''python", '').replace("'''", '')
-					with open(path, 'w') as file:
-						file.write(code)
+					saveCodeBlock(message, path, modulename)
 				else:
 					await message.attachments[0].save(path)
 				try:
@@ -139,9 +140,9 @@ class Modules:
 				except Exception as e:
 					await message.channel.send( embed=utils.getTracebackEmbed(e) )
 					return
-				self.modules[cmd[1]] = [message.author.id, module]
-				self.savedata[cmd[1]] = [message.author.id, path]
-				await message.channel.send(f'module "{cmd[1]}" successfully added')
+				self.modules[ modulename ] = [message.author.id, module]
+				self.savedata[ modulename ] = [message.author.id, path]
+				await message.channel.send(f'module "{modulename}" successfully updated')
 
 			with open('./options', 'r') as file:
 				data = json.load(file)
@@ -154,11 +155,29 @@ class Modules:
 	async def handle(self, msg: Message):
 		cmd = msg.content.split(' ')[0]
 		if cmd in self.commands.keys():
-			await self.commands[cmd](msg)
+			try:
+				await self.commands[cmd](msg)
+			except Exception as e:
+				await msg.channel.send( embed=utils.getTracebackEmbed(e) )
+
+	async def reload(self, module: str) -> None:
+		spec = self.modules[module][1].__spec__
+		self.modules[module][1] = importlib.util.module_from_spec( spec )
+		spec.loader.exec_module(self.modules[module][1])
 
 	def __getattr__(self, item):
 		if item == 'prefix':
 			return self.bot.prefix
+
+
+def saveCodeBlock(msg: Message, path: str, modulename: str, mode: str = 'w') -> None:
+	code: str = msg.content.replace(f' add {modulename}\n', '')
+	code = code.replace(f' update {modulename}\n', '')
+	code = code.replace("```python", '').replace("```", '')
+	if 'import modules' not in code:
+		code = 'import modules\n' + code
+	with open(path, mode) as file:
+		file.write(code)
 
 
 def Command(func):
