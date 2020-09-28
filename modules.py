@@ -71,7 +71,7 @@ class Modules:
 					modules.append(f'{name} by {message.channel.guild.get_member(value[0])}')
 				if len( modules ) == 0:
 					modules.append('no modules found')
-				await message.channel.send( embed=utils.embed( 'Module List', '/n'.join(modules), discord.Color.blue() ) )
+				await message.channel.send( embed=utils.embed( 'Module List', '\n'.join(modules), discord.Color.blue() ) )
 			else:
 				if ( len( message.mentions ) == 0 ) or ( len( message.mentions ) > 1 ):
 					await message.channel.send(f'should have as parameter exactly ONE mention or "all"')
@@ -82,7 +82,7 @@ class Modules:
 							modules.append(name)
 					if len(modules) == 0:
 						modules.append('no modules found')
-					await message.channel.send( embed=utils.embed( f'Modules Made By {user}', '/n'.join(modules), discord.Color.blue() ) )
+					await message.channel.send( embed=utils.embed( f'Modules Made By {user}', '\n'.join(modules), discord.Color.blue() ) )
 
 		else:
 
