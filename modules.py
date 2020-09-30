@@ -164,7 +164,7 @@ class Modules:
 	async def reload(self, module: str) -> None:
 		spec = self.modules[module][1].__spec__
 		self.modules[module][1] = importlib.util.module_from_spec( spec )
-		spec.loader.exec_module(self.modules[module][1])
+		spec.loader.exec_module( self.modules[module][1] )
 
 	def __getattr__(self, item):
 		if item == 'prefix':
