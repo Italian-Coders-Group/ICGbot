@@ -42,12 +42,6 @@ class Commands:
 			return
 		print('break!')
 
-	async def setErrorChat( self, msg: Message ):
-		if msg.author.id == utils.enderzombi():
-			bot.Bot.errorChat = msg.channel
-		else:
-			await utils.send(msg, 'only ENDERZOMBI102 can use that command')
-
 	async def setActivity(self, msg: Message):
 		if msg.author.id != utils.enderzombi():
 			await utils.send(msg, 'only ENDERZOMBI102 can use that command')
