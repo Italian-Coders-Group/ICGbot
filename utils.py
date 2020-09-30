@@ -7,9 +7,12 @@ from discord import Message, Embed
 
 inviteLink: str = discord.utils.oauth_url( '754402963971113010', discord.abc.Permissions( 70569024 ) )
 
-
+# Please keep in alphabetical order and [a-z] only thanks
 def enderzombi() -> int:
 	return 350938367405457408
+
+def samplasion() -> int:
+	return 280399026749440000
 
 
 def embed(title: str, content: str, color: discord.Color) -> Embed:
