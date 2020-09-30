@@ -177,7 +177,6 @@ def saveCodeBlock(msg: Message, path: str, modulename: str) -> None:
 	code = code.replace("```python", '').replace("```", '')
 	if 'import modules' not in code:
 		code = 'import modules\n' + code
-	print(code)
 	x = Path(path)
 	mode = 'w' if x.exists() else 'x'
 	with x.open( mode ) as file:
