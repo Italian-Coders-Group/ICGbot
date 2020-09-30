@@ -43,9 +43,11 @@ def getTraceback(exc: Exception) -> str:
 
 
 def getTracebackEmbed(exc: Exception) -> Embed:
+	prettyExc = ''.join( traceback.format_exception(type(exc), exc, exc.__traceback__) )
+	print(prettyExc)
 	return embed(
 		title='Uncaught Exception!',
-		content=getTraceback(exc),
+		content=prettyExc,
 		color=discord.Color.red()
 	)
 

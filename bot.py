@@ -25,7 +25,6 @@ class Bot:
 		with open('./options', 'r') as file:
 			data = json.load(file)
 		Bot.prefix = data['bot']['prefix']
-		del data
 		# init stuff
 		Bot.instance = self
 		Bot.client = discord.Client()
@@ -136,7 +135,3 @@ class Bot:
 if __name__ == '__main__':
 	bot = Bot()
 	bot.run()
-
-
-	def Quit():
-		del bot

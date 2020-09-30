@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from types import ModuleType
 from typing import List, Dict, Union, Callable
 import importlib.util
@@ -110,13 +111,13 @@ class Modules:
 					await message.channel.send(f'module "{modulename}" already exist! use module update to update it')
 					return
 				if isCodeBlock:
-					saveCodeBlock(message, path, modulename, 'x')
+					saveCodeBlock( message, path, modulename )
 				else:
 					await message.attachments[0].save(path)
 				try:
 					module = getModule( cmd[0], path )
 				except Exception as e:
-					await message.channel.send( embed=utils.getTracebackEmbed(e) )
+					await utils.send( message, embed=utils.getTracebackEmbed(e) )
 					return
 				self.modules[ modulename ] = [ message.author.id, module ]
 				self.savedata[ modulename ] = [ message.author.id, path]
@@ -132,13 +133,13 @@ class Modules:
 					await message.channel.send(f'module "{modulename}" does not exist! use module add to add it')
 					return
 				if isCodeBlock:
-					saveCodeBlock(message, path, modulename)
+					saveCodeBlock( message, path, modulename )
 				else:
 					await message.attachments[0].save(path)
 				try:
 					module = getModule(cmd[0], path)
 				except Exception as e:
-					await message.channel.send( embed=utils.getTracebackEmbed(e) )
+					await utils.send( message, embed=utils.getTracebackEmbed(e) )
 					return
 				self.modules[ modulename ] = [message.author.id, module]
 				self.savedata[ modulename ] = [message.author.id, path]
@@ -170,14 +171,17 @@ class Modules:
 			return self.bot.prefix
 
 
-def saveCodeBlock(msg: Message, path: str, modulename: str, mode: str = 'w') -> None:
+def saveCodeBlock(msg: Message, path: str, modulename: str) -> None:
 	code: str = msg.content.replace(f' add {modulename}\n', '')
 	code = code.replace(f' update {modulename}\n', '')
 	code = code.replace("```python", '').replace("```", '')
 	if 'import modules' not in code:
 		code = 'import modules\n' + code
-	with open(path, mode) as file:
-		file.write(code)
+	print(code)
+	x = Path(path)
+	mode = 'w' if x.exists() else 'x'
+	with x.open( mode ) as file:
+		file.write( code )
 
 
 def Command(func):

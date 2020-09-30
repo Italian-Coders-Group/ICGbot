@@ -5,6 +5,7 @@ import discord
 from discord import Message, Embed
 
 import utils
+import bot
 
 
 class Commands:
@@ -40,6 +41,12 @@ class Commands:
 			await utils.send(msg, 'only ENDERZOMBI102 can use that command')
 			return
 		print('break!')
+
+	async def setErrorChat( self, msg: Message ):
+		if msg.author.id == utils.enderzombi():
+			bot.Bot.errorChat = msg.channel
+		else:
+			await utils.send(msg, 'only ENDERZOMBI102 can use that command')
 
 	async def setActivity(self, msg: Message):
 		if msg.author.id != utils.enderzombi():
