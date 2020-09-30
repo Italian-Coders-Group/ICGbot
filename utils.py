@@ -7,9 +7,11 @@ from discord import Message, Embed
 
 inviteLink: str = discord.utils.oauth_url( '754402963971113010', discord.abc.Permissions( 70569024 ) )
 
+
 # Please keep in alphabetical order and [a-z] only thanks
 def enderzombi() -> int:
 	return 350938367405457408
+
 
 def samplasion() -> int:
 	return 280399026749440000
@@ -31,15 +33,6 @@ def getColor(RGB: str) -> discord.Color:
 	g: int = int( rgb[1] )
 	b: int = int( rgb[2] )
 	return discord.colour.Color.from_rgb(r, g, b)
-
-
-def getTraceback(exc: Exception) -> str:
-	buf = io.StringIO()
-	buf.write('```')
-	traceback.print_tb(exc.__traceback__, None, buf)
-	buf.write('```')
-	print(buf.getvalue())
-	return buf.getvalue()
 
 
 def getTracebackEmbed(exc: Exception) -> Embed:
