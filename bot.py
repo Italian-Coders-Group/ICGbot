@@ -33,7 +33,7 @@ class Bot:
 		self.module = modules.Modules()
 		self.module.bot = self
 		Bot.stdCommands = commands.Commands()
-		Bot.stdCommands.bot = self
+		Bot.stdCommands._bot = self
 
 	async def on_ready(self):
 		await self.client.get_guild(500396398324350989).me.edit(nick=f'[{self.prefix}] ICGbot')
@@ -96,7 +96,7 @@ class Bot:
 					return
 				else:
 					self.stdCommands = commands.Commands()
-					self.stdCommands.bot = self
+					self.stdCommands._bot = self
 			elif module == 'utils':
 				try:
 					importlib.reload(utils)
@@ -105,7 +105,7 @@ class Bot:
 					return
 				else:
 					self.stdCommands = commands.Commands()
-					self.stdCommands.bot = self
+					self.stdCommands._bot = self
 			else:
 				await utils.send(msg, 'invalid module "{module}"')
 				return

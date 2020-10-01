@@ -10,7 +10,7 @@ import bot
 
 class Commands:
 
-	_bot = None
+	_bot: bot.Bot = None
 
 	async def echo(self, msg: Message):
 		await msg.channel.send( ' '.join( msg.content.split(' ')[ 1::len( msg.content.split(' ') )-1 ] ) )
@@ -51,3 +51,4 @@ class Commands:
 
 	async def ping(self, msg: Message):
 		await utils.send(msg, f'pong! my ping is {int(self._bot.client.latency*1000)}ms')
+
