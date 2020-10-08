@@ -1,6 +1,6 @@
 import importlib
 import os
-import string
+import sys
 import json
 
 import discord
@@ -9,6 +9,9 @@ from discord.message import Message
 import modules
 import utils
 import commands
+
+
+sys.path.append('./modules')
 
 
 class Bot:

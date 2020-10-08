@@ -23,7 +23,7 @@ class Modules:
 		# get the saved modules
 		Modules.savedata = data['modules']
 		for name, mod in Modules.savedata.items():
-			print(name+' '+mod[1])
+			print(f'loaded {name} from {mod[1]}')
 			Modules.modules[name] = [ mod[0], getModule( name, mod[1] ) ]
 
 	async def mhandle(self, message: Message):
@@ -144,14 +144,14 @@ class Modules:
 				self.modules[ modulename ] = [message.author.id, module]
 				self.savedata[ modulename ] = [message.author.id, path]
 				await message.channel.send(f'module "{modulename}" successfully updated')
-
-			with open('./options', 'r') as file:
-				data = json.load(file)
-			# update with new data
-			data['modules'] = self.savedata
-			# write options
-			with open('./options', 'w') as file:
-				json.dump(data, file, indent=4)
+		# save everything
+		with open('./options', 'r') as file:
+			data = json.load(file)
+		# update with new data
+		data['modules'] = self.savedata
+		# write options
+		with open('./options', 'w') as file:
+			json.dump(data, file, indent=4)
 
 	async def handle(self, msg: Message):
 		cmd = msg.content.split(' ')[0]
