@@ -18,7 +18,7 @@ the coroutine name will be the command name, pretty simple uh?<br>
 the modules file will be imported automatically by the bot, so no worries about it!
 
 
-## Fantastic! but the seems hardcoded for some stuff, why?
+## Fantastic! but there seems to be some hardcoded stuff, why?
 This is a bot principally made a the Italian Coders group discord server, so it has hardcoded some ICG stuff, like permissions and ids.
 
 
