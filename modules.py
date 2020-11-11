@@ -54,7 +54,7 @@ class Modules:
 			# author check
 			if message.author.id not in (self.modules[ cmd[1] ][0], utils.enderzombi):
 				await message.channel.send(
-					f'only {message.guild.get_member( self.modules[ cmd[1] ][0] )} can delete this module'
+					f'only {await message.guild.fetch_member( self.modules[ cmd[1] ][0] )} can delete this module'
 				)
 				return
 			os.remove( self.savedata[ cmd[1] ][1] )
@@ -69,7 +69,7 @@ class Modules:
 				await message.channel.send('missing parameter, all or <AUTHOR>')
 			elif cmd[1] == 'all':
 				for name, value in self.modules.items():
-					modules.append(f'{name} by {message.channel.guild.get_member(value[0])}')
+					modules.append(f'{name} by {await message.channel.guild.fetch_member(value[0])}')
 				if len( modules ) == 0:
 					modules.append('no modules found')
 				await message.channel.send( embed=utils.embed( 'Module List', '\n'.join(modules), discord.Color.blue() ) )
