@@ -3,10 +3,6 @@
         "prefix": "\\"
     },
     "modules": {
-        "test": [
-            350938367405457408,
-            "./modules/test.py"
-        ],
         "showcode": [
             350938367405457408,
             "./modules/showcode.py"
@@ -18,6 +14,10 @@
         "pipinstall": [
             350938367405457408,
             "./modules/pipinstall.py"
+        ],
+        "eval": [
+            350938367405457408,
+            "./modules/eval.py"
         ]
     }
 }

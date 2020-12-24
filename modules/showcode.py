@@ -1,10 +1,11 @@
 import modules
 import utils
 from pathlib import Path
+from discord import Message
 
 
 @modules.Command
-async def showcode(msg):
+async def showcode(msg: Message):
 	module = msg.content.replace('showcode', '', 1).strip()
 	# there's a parameter?
 	if module == '':
@@ -19,7 +20,7 @@ async def showcode(msg):
 				await msg.channel.send(f"module {module} does't exist!")
 				return
 			# get author
-			author = msg.channel.guild.get_member(modules.Modules.savedata[module][0])
+			author = msg.channel.guild.get_member( modules.Modules.savedata[module][0] )
 		else:
 			# bot files
 			path = Path(f'./{module}.py')

@@ -27,8 +27,12 @@ class Modules:
 			Modules.modules[name] = [ mod[0], getModule( name, mod[1] ) ]
 
 	async def mhandle(self, message: Message):
-		# remove "module"
-		message.content = message.content.replace('module', '', 1)
+		"""
+		Handles $(prefix)module commands
+		:param message: the message with the command
+		"""
+		# remove "module " from the command
+		message.content = message.content.replace('module ', '', 1).replace('modules ', '', 1)
 		cmd = message.content.split(' ')
 		if cmd[0] == 's':
 			cmd.remove('s')
