@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from types import ModuleType
-from typing import List, Dict, Union, Callable
+from typing import List, Dict, Callable, Union
 import importlib.util
 import os
 from discord.message import Message
@@ -12,9 +12,9 @@ import utils
 
 class Modules:
 
-	modules: Dict[ str, List[ Union[ str, ModuleType] ] ] = {}
+	modules: Dict[ str, List[ Union[ int, ModuleType ] ] ] = {}
 	bot = None
-	savedata: Dict[ str, List[ str ] ] = {}
+	savedata: Dict[ str, List[ Union[ int, str ] ] ] = {}
 	commands: Dict[str, Callable] = {}
 
 	def __init__(self):
@@ -23,8 +23,8 @@ class Modules:
 		# get the saved modules
 		Modules.savedata = data['modules']
 		for name, mod in Modules.savedata.items():
-			print(f'loaded {name} from {mod[1]}')
 			Modules.modules[name] = [ mod[0], getModule( name, mod[1] ) ]
+			print( f'loaded {name} from {mod[ 1 ]}' )
 
 	async def mhandle(self, message: Message):
 		"""
@@ -58,7 +58,7 @@ class Modules:
 			# author check
 			if message.author.id not in (self.modules[ cmd[1] ][0], utils.enderzombi):
 				await message.channel.send(
-					f'only {message.guild.get_member( self.modules[ cmd[1] ][0] )} can delete this module'
+					f'only {await message.guild.fetch_member( self.modules[ cmd[1] ][0] )} can delete this module'
 				)
 				return
 			os.remove( self.savedata[ cmd[1] ][1] )
@@ -70,10 +70,10 @@ class Modules:
 		elif cmd[0] == 'list':
 			modules = []
 			if len( cmd ) < 2:
-				await message.channel.send('missing parameter, all or <AUTHOR>')
-			elif cmd[1] == 'all':
+				cmd.append('all')
+			if cmd[1] == 'all':
 				for name, value in self.modules.items():
-					modules.append(f'{name} by {message.channel.guild.get_member(value[0])}')
+					modules.append(f'{name} by {await message.channel.guild.fetch_member( int( value[0] ) )}')
 				if len( modules ) == 0:
 					modules.append('no modules found')
 				await message.channel.send( embed=utils.embed( 'Module List', '\n'.join(modules), discord.Color.blue() ) )
@@ -98,14 +98,14 @@ class Modules:
 				await message.channel.send('missing module (.py) file')
 				return
 			# module name check
-			if len(cmd) < 2:
+			if len(cmd) < 2 and isCodeBlock:
 				await message.channel.send(f'missing parameter <modulename>.')
 				return
 			# create needed variables
-			modulename: str = cmd[1]
+			modulename: str = cmd[1] if isCodeBlock else message.attachments[0].filename.replace('.py', '', 1)
 			if '\n' in modulename:
 				modulename = modulename.split('\n')[0]
-			path = f'./modules/{message.attachments[0].filename if not isCodeBlock else modulename + ".py"}'
+			path = f'./modules/{modulename + ".py"}'
 
 			if cmd[0] == 'add':
 				# parameter check

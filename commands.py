@@ -13,7 +13,7 @@ class Commands:
 	_bot: bot.Bot = None
 
 	async def echo(self, msg: Message):
-		await msg.channel.send( ' '.join( msg.content.split(' ')[ 1::len( msg.content.split(' ') )-1 ] ) )
+		await msg.channel.send( ' '.join( msg.content.split(' ')[ 1:len( msg.content.split(' ') ) ] ) )
 
 	async def cp(self, msg: Message):
 		msg.content = msg.content.replace('cp', '')

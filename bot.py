@@ -51,7 +51,7 @@ class Bot:
 			return
 		msg.content = msg.content.replace(self.prefix, '', 1)
 		cmd = msg.content.split(" ")
-		print(f'command: {cmd[0]}, parameters: {cmd[1::len(cmd)-1] if len(cmd) > 1 else None}, issuer: {msg.author.name}')
+		print(f'command: {cmd[0]}, parameters: {cmd[ 1:len(cmd) ] if len(cmd) > 1 else None}, issuer: {msg.author.name}')
 		if msg.content.startswith('reload'):
 			await self.reload(msg)
 		elif msg.content.startswith('module'):
