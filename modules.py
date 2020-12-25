@@ -159,11 +159,13 @@ class Modules:
 
 	async def handle(self, msg: Message):
 		cmd = msg.content.split(' ')[0]
-		if cmd in self.commands.keys():
-			try:
-				await self.commands[cmd](msg)
-			except Exception as e:
-				await msg.channel.send( embed=utils.getTracebackEmbed(e) )
+		for key in self.commands.keys():
+			if cmd.lower() == key.lower():
+				try:
+					await self.commands[ key ]( msg )
+				except Exception as e:
+					await msg.channel.send( embed=utils.getTracebackEmbed( e ) )
+				break
 
 	async def reload(self, module: str) -> None:
 		spec = self.modules[module][1].__spec__
