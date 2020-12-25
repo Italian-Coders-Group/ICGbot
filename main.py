@@ -1,3 +1,5 @@
+from time import sleep
+
 import bot
 import multiprocessing
 
@@ -10,12 +12,12 @@ def Bot():
 
 
 def run():
-	instance = multiprocessing.Process(target=Bot)
-	instance.start()
-	while instance.is_alive():
-		pass
-	del instance
-	return run()
+	while True:
+		instance = multiprocessing.Process(target=Bot)
+		instance.start()
+		while instance.is_alive():
+			sleep(20)
+		del instance
 
 
 if __name__ == '__main__':
