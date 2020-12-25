@@ -1,6 +1,5 @@
 import discord
 import traceback
-import io
 from typing import Union
 
 from discord import Message, Embed
@@ -17,14 +16,16 @@ def samplasion() -> int:
 	return 280399026749440000
 
 
-def embed(title: str, content: str, color: discord.Color) -> Embed:
-	data = Embed(
+def makeEmbed(title: str, content: str, color: discord.Color, footer: str = None) -> Embed:
+	embed = Embed(
 		color=color,
 		title=title,
 		description=content,
 		type='rich_embed'
 	)
-	return data
+	if footer is not None:
+		embed.set_footer(text=footer)
+	return embed
 
 
 def getColor(RGB: str) -> discord.Color:
@@ -38,7 +39,7 @@ def getColor(RGB: str) -> discord.Color:
 def getTracebackEmbed(exc: Exception) -> Embed:
 	prettyExc = ''.join( traceback.format_exception(type(exc), exc, exc.__traceback__) )
 	print(prettyExc)
-	return embed(
+	return makeEmbed(
 		title='Uncaught Exception!',
 		content=prettyExc,
 		color=discord.Color.red()
