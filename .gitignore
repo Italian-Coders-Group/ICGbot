@@ -1,5 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
-modules
+modules/*.py
+moduless/*.py
 .env
 options
 __pycache__/
+vps
+vps.bat
