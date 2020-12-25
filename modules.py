@@ -76,7 +76,14 @@ class Modules:
 					modules.append(f'{name} by {await message.channel.guild.fetch_member( int( value[0] ) )}')
 				if len( modules ) == 0:
 					modules.append('no modules found')
-				await message.channel.send( embed=utils.embed( 'Module List', '\n'.join(modules), discord.Color.blue() ) )
+				await message.channel.send(
+					embed=utils.makeEmbed(
+						title='Module List',
+						content='\n'.join(modules),
+						color=discord.Color.blue(),
+						footer='ICGbot by (mainly) ENDERZOMBI102'
+					)
+				)
 			else:
 				if ( len( message.mentions ) == 0 ) or ( len( message.mentions ) > 1 ):
 					await message.channel.send(f'should have as parameter exactly ONE mention or "all"')
@@ -87,7 +94,14 @@ class Modules:
 							modules.append(name)
 					if len(modules) == 0:
 						modules.append('no modules found')
-					await message.channel.send( embed=utils.embed( f'Modules Made By {user}', '\n'.join(modules), discord.Color.blue() ) )
+					await message.channel.send(
+						embed=utils.makeEmbed(
+							title=f'Modules Made By {user}',
+							content='\n'.join(modules),
+							color=discord.Color.blue(),
+							footer='ICGbot by (mainly) ENDERZOMBI102'
+						)
+					)
 
 		else:
 
