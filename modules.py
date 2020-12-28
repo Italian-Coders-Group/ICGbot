@@ -23,19 +23,25 @@ class Modules:
 		# get the saved modules
 		Modules.savedata = data['modules']
 		for name, mod in Modules.savedata.items():
-			Modules.modules[name] = [ mod[0], getModule( name, mod[1] ) ]
-			print( f'loaded {name} from {mod[ 1 ]}' )
+			try:
+				Modules.modules[name] = [ mod[0], getModule( name, mod[1] ) ]
+			except BaseException as e:
+				print( f'caught {e.__class__.__name__} from module {name}, this module will not be available')
+			else:
+				print( f'loaded {name} from {mod[ 1 ]}' )
 
 	async def mhandle(self, message: Message):
 		"""
 		Handles $(prefix)module commands
 		:param message: the message with the command
 		"""
-		# remove "module " from the command
-		message.content = message.content.replace('module ', '', 1).replace('modules ', '', 1)
-		cmd = message.content.split(' ')
-		if cmd[0] == 's':
-			cmd.remove('s')
+		# remove "module" from the command
+		txt = message.content
+		if txt.startswith('modules'):
+			txt = txt[7::]
+		elif txt.startswith('module'):
+			txt = txt[6::]
+		cmd = txt.split(' ')
 		if cmd[0] == '':
 			del cmd[0]
 		if len( cmd ) == 0:
@@ -72,8 +78,8 @@ class Modules:
 			if len( cmd ) < 2:
 				cmd.append('all')
 			if cmd[1] == 'all':
-				for name, value in self.modules.items():
-					modules.append(f'{name} by {await message.channel.guild.fetch_member( int( value[0] ) )}')
+				for name, value in self.savedata.items():
+					modules.append(f'{name}{"" if name in self.modules.keys() else "*"} by {await message.channel.guild.fetch_member( int( value[0] ) )}')
 				if len( modules ) == 0:
 					modules.append('no modules found')
 				await message.channel.send(
@@ -81,7 +87,7 @@ class Modules:
 						title='Module List',
 						content='\n'.join(modules),
 						color=discord.Color.blue(),
-						footer='ICGbot by (mainly) ENDERZOMBI102'
+						footer='modules with a leading * are disabled\nICGbot by (mainly) ENDERZOMBI102'
 					)
 				)
 			else:
@@ -89,17 +95,17 @@ class Modules:
 					await message.channel.send(f'should have as parameter exactly ONE mention or "all"')
 				else:
 					user = message.mentions[0]
-					for name, value in self.modules.items():
+					for name, value in self.savedata.items():
 						if value[0] == user.id:
-							modules.append(name)
+							modules.append(f'{name}{"" if name in self.modules.keys() else "*"}')
 					if len(modules) == 0:
-						modules.append('no modules found')
+						modules.append("seems that this user didn't made any module")
 					await message.channel.send(
 						embed=utils.makeEmbed(
 							title=f'Modules Made By {user}',
 							content='\n'.join(modules),
 							color=discord.Color.blue(),
-							footer='ICGbot by (mainly) ENDERZOMBI102'
+							footer='modules with a leading * are disabled\nICGbot by (mainly) ENDERZOMBI102'
 						)
 					)
 
