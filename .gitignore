@@ -6,3 +6,4 @@ options
 __pycache__/
 vps
 vps.bat
+/tmp
