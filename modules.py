@@ -99,7 +99,7 @@ class Modules:
 						if value[0] == user.id:
 							modules.append(f'{name}{"" if name in self.modules.keys() else "*"}')
 					if len(modules) == 0:
-						modules.append("seems that this user didn't made any module")
+						modules.append("seems like this user didn't made any module")
 					await message.channel.send(
 						embed=utils.makeEmbed(
 							title=f'Modules Made By {user}',
