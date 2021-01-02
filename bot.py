@@ -4,6 +4,7 @@ import sys
 import json
 
 import discord
+from discord import Member
 from discord.message import Message
 
 import modules
@@ -58,6 +59,31 @@ class Bot:
 			await self.module.mhandle(msg)
 		else:
 			await self.handleCommand(msg)
+
+	async def on_member_join( self, member: Member ):
+		await self.module.handleEvent(
+			'memberJoin',
+			{
+				'member': member
+			}
+		)
+
+	async def on_member_leave( self, member: Member ):
+		await self.module.handleEvent(
+			'memberLeave',
+			{
+				'member': member
+			}
+		)
+
+	async def on_member_update( self, before: Member, after: Member ):
+		await self.module.handleEvent(
+			'memberUpdate',
+			{
+				'before': before,
+				'after': after
+			}
+		)
 
 	async def reload(self, msg: Message):
 		# user check

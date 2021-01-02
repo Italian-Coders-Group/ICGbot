@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
-from types import ModuleType
-from typing import List, Dict, Callable, Union
+from types import ModuleType, FunctionType
+from typing import List, Dict, Union, Literal
 import importlib.util
 import os
 from discord.message import Message
@@ -15,7 +15,8 @@ class Modules:
 	modules: Dict[ str, List[ Union[ int, ModuleType ] ] ] = {}
 	bot = None
 	savedata: Dict[ str, List[ Union[ int, str ] ] ] = {}
-	commands: Dict[str, Callable] = {}
+	commands: Dict[str, FunctionType] = {}
+	eventListeners: Dict[str, List[FunctionType] ] = {}
 
 	def __init__(self):
 		with open('./options', 'r') as file:
@@ -187,6 +188,10 @@ class Modules:
 					await msg.channel.send( embed=utils.getTracebackEmbed( e ) )
 				break
 
+	async def handleEvent( self, evt: Literal['memberJoin', 'memberLeave', 'memberUpdate'], data: dict ):
+		for hdlr in Modules.eventListeners[evt]:
+			await hdlr( data )
+
 	async def reload(self, module: str) -> None:
 		spec = self.modules[module][1].__spec__
 		self.modules[module][1] = importlib.util.module_from_spec( spec )
@@ -211,13 +216,24 @@ def saveCodeBlock(msg: Message, path: str, modulename: str) -> None:
 
 def Command(func):
 	"""
-	a decorator for commands
-	the decorated function name is the command name
-	:param func:
-	:return:
+	A the decorated function name is the command name
+	:param func: * decorated function *
 	"""
 	CName = func.__code__.co_name
 	Modules.commands[CName] = func
+
+
+def EventHandler( func: FunctionType, evt: Literal['memberJoin', 'memberLeave', 'memberUpdate'] ):
+	"""
+	A decorator for event handlers,
+	the decorated functions will be called when the subscribed event occours
+	:param func: * decorated function *
+	:param evt: one of memberJoin memberLeave memberUpdate
+	"""
+	print(f'Found event handler for event "{evt}": {func.__code__.co_name}')
+	if evt not in Modules.eventListeners.keys():
+		Modules.eventListeners[evt] = []
+	Modules.eventListeners[evt].append(func)
 
 
 def getModule(name: str, path: str) -> ModuleType:
