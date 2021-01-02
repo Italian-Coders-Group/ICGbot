@@ -136,11 +136,11 @@ class Modules:
 					await message.channel.send(f'module "{modulename}" already exist! use module update to update it')
 					return
 				if isCodeBlock:
-					saveCodeBlock( message, path, modulename )
+					saveCodeBlock( txt, path, modulename )
 				else:
 					await message.attachments[0].save(path)
 				try:
-					module = getModule( cmd[0], path )
+					module = getModule( modulename, path )
 				except Exception as e:
 					await utils.send( message, embed=utils.getTracebackEmbed(e) )
 					return
@@ -162,7 +162,7 @@ class Modules:
 				else:
 					await message.attachments[0].save(path)
 				try:
-					module = getModule(cmd[0], path)
+					module = getModule(modulename, path)
 				except Exception as e:
 					await utils.send( message, embed=utils.getTracebackEmbed(e) )
 					return
@@ -202,8 +202,8 @@ class Modules:
 			return self.bot.prefix
 
 
-def saveCodeBlock(msg: Message, path: str, modulename: str) -> None:
-	code: str = msg.content.replace(f' add {modulename}\n', '')
+def saveCodeBlock(text: str, path: str, modulename: str) -> None:
+	code: str = text.replace(f' add {modulename}\n', '')
 	code = code.replace(f' update {modulename}\n', '')
 	code = code.replace("```python", '').replace("```", '')
 	if 'import modules' not in code:
@@ -223,21 +223,24 @@ def Command(func):
 	Modules.commands[CName] = func
 
 
-def EventHandler( func: FunctionType, evt: Literal['memberJoin', 'memberLeave', 'memberUpdate'] ):
+def EventHandler( evt: Literal['memberJoin', 'memberLeave', 'memberUpdate'] ):
 	"""
 	A decorator for event handlers,
 	the decorated functions will be called when the subscribed event occours
 	:param func: * decorated function *
 	:param evt: one of memberJoin memberLeave memberUpdate
 	"""
-	print(f'Found event handler for event "{evt}": {func.__code__.co_name}')
-	if evt not in Modules.eventListeners.keys():
-		Modules.eventListeners[evt] = []
-	Modules.eventListeners[evt].append(func)
+	def decorator(func):
+		print(f'Found event handler for event "{evt}": {func.__code__.co_name}')
+		if evt not in Modules.eventListeners.keys():
+			Modules.eventListeners[evt] = []
+		Modules.eventListeners[evt].append(func)
+	return decorator
 
 
 def getModule(name: str, path: str) -> ModuleType:
 	spec = importlib.util.spec_from_file_location(name, path)
+	spec.loader.load_module()
 	module = importlib.util.module_from_spec( spec )
 	spec.loader.exec_module(module)
 	return module
