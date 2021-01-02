@@ -54,7 +54,7 @@ class Commands:
 
 	async def trigger( self, msg: Message ):
 		author = msg.author
-		event = msg.content[7::]
+		event = msg.content[7::].strip()
 		if event == 'join':
 			await self._bot.on_member_join(author)
 		elif event == 'leave':

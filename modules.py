@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from types import ModuleType, FunctionType
+from types import ModuleType, FunctionType, CodeType
 from typing import List, Dict, Union, Literal
 import importlib.util
 import os
@@ -16,7 +16,7 @@ class Modules:
 	bot = None
 	savedata: Dict[ str, List[ Union[ int, str ] ] ] = {}
 	commands: Dict[str, FunctionType] = {}
-	eventListeners: Dict[str, List[FunctionType] ] = {}
+	eventListeners: Dict[str, Dict[str, List[FunctionType] ] ] = {}
 
 	def __init__(self):
 		with open('./options', 'r') as file:
@@ -189,11 +189,16 @@ class Modules:
 				break
 
 	async def handleEvent( self, evt: Literal['memberJoin', 'memberLeave', 'memberUpdate'], data: dict ):
-		for hdlr in Modules.eventListeners[evt]:
-			await hdlr( data )
+		for module in Modules.eventListeners[evt].values():
+			for hdlr in module:
+				await hdlr( data )
 
 	async def reload(self, module: str) -> None:
 		spec = self.modules[module][1].__spec__
+		# delete old event listeners
+		for evt in Modules.eventListeners.keys():
+			if f'{module}.py' in Modules.eventListeners[evt].keys():
+				del Modules.eventListeners[evt][f'{module}.py']
 		self.modules[module][1] = importlib.util.module_from_spec( spec )
 		spec.loader.exec_module( self.modules[module][1] )
 
@@ -233,8 +238,10 @@ def EventHandler( evt: Literal['memberJoin', 'memberLeave', 'memberUpdate'] ):
 	def decorator(func):
 		print(f'Found event handler for event "{evt}": {func.__code__.co_name}')
 		if evt not in Modules.eventListeners.keys():
-			Modules.eventListeners[evt] = []
-		Modules.eventListeners[evt].append(func)
+			Modules.eventListeners[evt] = {}
+		if func.__code__.co_filename not in Modules.eventListeners[evt].keys():
+			Modules.eventListeners[ evt ][ func.__code__.co_filename ] = []
+		Modules.eventListeners[evt][func.__code__.co_filename].append(func)
 	return decorator
 
 
