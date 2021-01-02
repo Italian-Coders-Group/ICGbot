@@ -2,6 +2,7 @@ import importlib
 import os
 import sys
 import json
+from typing import Union
 
 import discord
 from discord import Member
@@ -23,6 +24,7 @@ class Bot:
 	module = None
 	stdCommands = None
 	lastReload: str = None
+	eventChannel: Union[discord.TextChannel, int]
 
 	def __init__(self):
 		# load saved data
@@ -34,6 +36,7 @@ class Bot:
 		Bot.client = discord.Client()
 		self.client.event(self.on_ready)
 		self.client.event(self.on_message)
+		self.eventChannel = data['bot']['eventChannel']
 		self.module = modules.Modules()
 		self.module.bot = self
 		Bot.stdCommands = commands.Commands()
@@ -41,6 +44,7 @@ class Bot:
 
 	async def on_ready(self):
 		await self.client.get_guild(500396398324350989).me.edit(nick=f'[{self.prefix}] ICGbot')
+		self.eventChannel = self.client.get_channel(self.eventChannel)
 		print(f'discord.py v{discord.__version__}')
 		print(f'We have logged in as {self.client.user}')
 
@@ -64,6 +68,7 @@ class Bot:
 		await self.module.handleEvent(
 			'memberJoin',
 			{
+				'echannel': self.eventChannel,
 				'member': member
 			}
 		)
@@ -72,6 +77,7 @@ class Bot:
 		await self.module.handleEvent(
 			'memberLeave',
 			{
+				'echannel': self.eventChannel,
 				'member': member
 			}
 		)
@@ -80,6 +86,7 @@ class Bot:
 		await self.module.handleEvent(
 			'memberUpdate',
 			{
+				'echannel': self.eventChannel,
 				'before': before,
 				'after': after
 			}
@@ -155,6 +162,7 @@ class Bot:
 			data = {
 				'bot': {
 					'prefix': Bot.prefix,
+					'eventChannel': self.eventChannel.id
 				},
 				'modules': self.module.modules
 			}
