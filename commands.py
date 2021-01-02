@@ -63,3 +63,14 @@ class Commands:
 			await self._bot.on_member_update(author, author)
 		else:
 			await msg.channel.send(f'Unkown event "{event}". Available events: join, leave, update.')
+
+	async def setEventChannel( self, msg: Message ):
+		if msg.author.id != utils.enderzombi():
+			await utils.send( msg, 'only ENDERZOMBI102 can use that command' )
+			return
+		if len( msg.channel_mentions ) == 0:
+			await msg.channel.send('Missing parameter <channelMention>')
+			return
+		self._bot.eventChannel = msg.channel_mentions[0]
+		await msg.channel.send(f'Setted event channel to "{self._bot.eventChannel.name}"')
+
