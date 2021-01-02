@@ -52,3 +52,14 @@ class Commands:
 	async def ping(self, msg: Message):
 		await utils.send(msg, f'pong! my ping is {int(self._bot.client.latency*1000)}ms')
 
+	async def trigger( self, msg: Message ):
+		author = msg.author
+		event = msg.content[7::]
+		if event == 'join':
+			await self._bot.on_member_join(author)
+		elif event == 'leave':
+			await self._bot.on_member_leave(author)
+		elif event == 'update':
+			await self._bot.on_member_update(author, author)
+		else:
+			await msg.channel.send(f'Unkown event "{event}". Available events: join, leave, update.')
