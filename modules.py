@@ -158,7 +158,7 @@ class Modules:
 					await message.channel.send(f'module "{modulename}" does not exist! use module add to add it')
 					return
 				if isCodeBlock:
-					saveCodeBlock( message, path, modulename )
+					saveCodeBlock( txt, path, modulename )
 				else:
 					await message.attachments[0].save(path)
 				try:
@@ -232,7 +232,6 @@ def EventHandler( evt: Literal['memberJoin', 'memberLeave', 'memberUpdate'] ):
 	"""
 	A decorator for event handlers,
 	the decorated functions will be called when the subscribed event occours
-	:param func: * decorated function *
 	:param evt: one of memberJoin memberLeave memberUpdate
 	"""
 	def decorator(func):
