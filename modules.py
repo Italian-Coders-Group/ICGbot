@@ -59,7 +59,7 @@ class Modules:
 			# module check
 			if cmd[1] not in self.modules.keys():
 				await message.channel.send(
-					f'the specified module ({cmd[1]}) does not exist. you can list all modules using {self.prefix}modules list all'
+					f'the specified module ({cmd[1]}) does not exist. you can list all modules using {self.bot.prefix}modules list all'
 				)
 				return
 			# author check
@@ -201,10 +201,6 @@ class Modules:
 				del Modules.eventListeners[evt][f'{module}.py']
 		self.modules[module][1] = importlib.util.module_from_spec( spec )
 		spec.loader.exec_module( self.modules[module][1] )
-
-	def __getattr__(self, item):
-		if item == 'prefix':
-			return self.bot.prefix
 
 
 def saveCodeBlock(text: str, path: str, modulename: str) -> None:
