@@ -13,16 +13,16 @@ import utils
 import commands
 
 
-sys.path.append('./modules')
+sys.path.append('./user-modules')
 
 
 class Bot:
 
-	instance = None
 	client: discord.Client
 	prefix: str = '!'
-	module = None
-	stdCommands = None
+	instance: 'Bot'
+	module: 'modules.Modules' = None
+	stdCommands: 'commands.Commands' = None
 	lastReload: str = None
 	eventChannel: Union[discord.TextChannel, int]
 
@@ -32,15 +32,18 @@ class Bot:
 			data = json.load(file)
 		Bot.prefix = data['bot']['prefix']
 		# init stuff
-		Bot.instance = self
 		Bot.client = discord.Client()
-		self.client.event(self.on_ready)
-		self.client.event(self.on_message)
+		self.client.event( self.on_ready )
+		self.client.event( self.on_message )
+		self.client.event( self.on_member_join )
+		self.client.event( self.on_member_leave )
+		self.client.event( self.on_member_update )
 		self.eventChannel = data['bot']['eventChannel']
 		self.module = modules.Modules()
 		self.module.bot = self
 		Bot.stdCommands = commands.Commands()
 		Bot.stdCommands._bot = self
+		Bot.instance = self
 
 	async def on_ready(self):
 		await self.client.get_guild(500396398324350989).me.edit(nick=f'[{self.prefix}] ICGbot')
@@ -63,12 +66,18 @@ class Bot:
 			await self.module.mhandle(msg)
 		else:
 			await self.handleCommand(msg)
+		await self.module.handleEvent(
+			'message',
+			{
+				'message': msg
+			}
+		)
 
 	async def on_member_join( self, member: Member ):
 		await self.module.handleEvent(
 			'memberJoin',
 			{
-				'echannel': self.eventChannel,
+				'channel': self.eventChannel,
 				'member': member
 			}
 		)
@@ -77,7 +86,7 @@ class Bot:
 		await self.module.handleEvent(
 			'memberLeave',
 			{
-				'echannel': self.eventChannel,
+				'channel': self.eventChannel,
 				'member': member
 			}
 		)
@@ -86,7 +95,7 @@ class Bot:
 		await self.module.handleEvent(
 			'memberUpdate',
 			{
-				'echannel': self.eventChannel,
+				'channel': self.eventChannel,
 				'before': before,
 				'after': after
 			}
@@ -167,8 +176,3 @@ class Bot:
 				'modules': self.module.modules
 			}
 			json.dump(data, file, indent=4)
-
-
-if __name__ == '__main__':
-	bot = Bot()
-	bot.run()
