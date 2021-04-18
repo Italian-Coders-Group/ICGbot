@@ -211,8 +211,8 @@ def saveCodeBlock(text: str, path: str, modulename: str) -> None:
 	code: str = text.replace(f' add {modulename}\n', '')
 	code = code.replace(f' update {modulename}\n', '')
 	code = code.replace("```python", '').replace("```", '')
-	if 'import modules' not in code:
-		code = 'import modules\n' + code
+	if 'from modules import Command, EventHandler' not in code or 'import modules' not in code:
+		code = 'from modules import Command, EventHandler\n' + code
 	x = Path(path)
 	mode = 'w' if x.exists() else 'x'
 	with x.open( mode ) as file:
