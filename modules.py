@@ -126,7 +126,7 @@ class Modules:
 			modulename: str = cmd[1] if isCodeBlock else message.attachments[0].filename.replace('.py', '', 1)
 			if '\n' in modulename:
 				modulename = modulename.split('\n')[0]
-			path = f'./modules/{modulename + ".py"}'
+			path = f'./user-modules/{modulename + ".py"}'
 
 			if cmd[0] == 'add':
 				# parameter check
@@ -188,10 +188,14 @@ class Modules:
 					await msg.channel.send( embed=utils.getTracebackEmbed( e ) )
 				break
 
-	async def handleEvent( self, evt: Literal['memberJoin', 'memberLeave', 'memberUpdate'], data: dict ):
-		for module in Modules.eventListeners[evt].values():
-			for hdlr in module:
-				await hdlr( data )
+	async def handleEvent( self, evt: Literal['memberJoin', 'memberLeave', 'memberUpdate', 'message'], data: dict ):
+		if evt not in Modules.eventListeners:
+			print(f'no listeners for event {evt}')
+		else:
+			for module in Modules.eventListeners[evt].values():
+				for hdlr in module:
+					print(f'{hdlr.__module__}.{hdlr.__name__} is handling event {evt}')
+					await hdlr( data )
 
 	async def reload(self, module: str) -> None:
 		spec = self.modules[module][1].__spec__
@@ -230,19 +234,22 @@ def EventHandler( evt: Literal['memberJoin', 'memberLeave', 'memberUpdate'] ):
 	the decorated functions will be called when the subscribed event occours
 	:param evt: one of memberJoin memberLeave memberUpdate
 	"""
-	def decorator(func):
-		print(f'Found event handler for event "{evt}": {func.__code__.co_name}')
-		if evt not in Modules.eventListeners.keys():
-			Modules.eventListeners[evt] = {}
-		if func.__code__.co_filename not in Modules.eventListeners[evt].keys():
-			Modules.eventListeners[ evt ][ func.__code__.co_filename ] = []
-		Modules.eventListeners[evt][func.__code__.co_filename].append(func)
+	if evt not in Modules.eventListeners.keys():
+		Modules.eventListeners[ evt ] = {}
+
+	def decorator(func: FunctionType):
+		print(f'Found event handler for event "{evt}": {func.__name__}')
+		filename = f'{func.__module__}.py'
+		if filename not in Modules.eventListeners[ evt ]:
+			Modules.eventListeners[ evt ][ filename ] = []
+		Modules.eventListeners[ evt ][ filename ].append(func)
+		return func
+
 	return decorator
 
 
 def getModule(name: str, path: str) -> ModuleType:
 	spec = importlib.util.spec_from_file_location(name, path)
-	spec.loader.load_module()
 	module = importlib.util.module_from_spec( spec )
 	spec.loader.exec_module(module)
 	return module
