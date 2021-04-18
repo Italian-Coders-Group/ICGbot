@@ -188,14 +188,14 @@ class Modules:
 					await msg.channel.send( embed=utils.getTracebackEmbed( e ) )
 				break
 
-	async def handleEvent( self, evt: Literal['memberJoin', 'memberLeave', 'memberUpdate', 'message'], data: dict ):
+	async def handleEvent( self, evt: Literal['memberJoin', 'memberLeave', 'memberUpdate', 'message', 'command'], **kwargs ):
 		if evt not in Modules.eventListeners:
 			print(f'no listeners for event {evt}')
 		else:
 			for module in Modules.eventListeners[evt].values():
 				for hdlr in module:
 					print(f'{hdlr.__module__}.{hdlr.__name__} is handling event {evt}')
-					await hdlr( data )
+					await hdlr( kwargs )
 
 	async def reload(self, module: str) -> None:
 		spec = self.modules[module][1].__spec__

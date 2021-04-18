@@ -53,8 +53,12 @@ class Bot:
 
 	async def on_message(self, msg: Message):
 		# if the message doesn't starts with the prefix or is sent by a bot, ignore it
-		if not self.client.user.bot:
+		if msg.author.bot:
 			return
+		await self.module.handleEvent(
+			'message',
+			message=msg
+		)
 		if not msg.content.startswith(self.prefix):
 			return
 		msg.content = msg.content.replace(self.prefix, '', 1)
@@ -67,38 +71,30 @@ class Bot:
 		else:
 			await self.handleCommand(msg)
 		await self.module.handleEvent(
-			'message',
-			{
-				'message': msg
-			}
+			'command',
+			message= msg
 		)
 
 	async def on_member_join( self, member: Member ):
 		await self.module.handleEvent(
 			'memberJoin',
-			{
-				'channel': self.eventChannel,
-				'member': member
-			}
+			channel=self.eventChannel,
+			member=member
 		)
 
 	async def on_member_leave( self, member: Member ):
 		await self.module.handleEvent(
 			'memberLeave',
-			{
-				'channel': self.eventChannel,
-				'member': member
-			}
+			channel=self.eventChannel,
+			member=member
 		)
 
 	async def on_member_update( self, before: Member, after: Member ):
 		await self.module.handleEvent(
 			'memberUpdate',
-			{
-				'channel': self.eventChannel,
-				'before': before,
-				'after': after
-			}
+			channel=self.eventChannel,
+			befor=before,
+			after=after
 		)
 
 	async def reload(self, msg: Message):
