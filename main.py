@@ -16,7 +16,7 @@ def run():
 		instance = multiprocessing.Process(target=Bot)
 		instance.start()
 		while instance.is_alive():
-			sleep(20)
+			sleep(100)
 		del instance
 
 
