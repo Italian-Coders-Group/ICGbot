@@ -33,7 +33,7 @@ class Bot:
 		Bot.prefix = data['bot']['prefix']
 		# init stuff
 		indents = discord.Intents.all()
-		indents.members = True
+		indents.presences = False
 		Bot.client = discord.Client(
 			indents=indents
 		)

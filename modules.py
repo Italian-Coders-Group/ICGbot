@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from types import ModuleType, FunctionType, CodeType
+from types import ModuleType, FunctionType
 from typing import List, Dict, Union, Literal
 import importlib.util
 import os
@@ -10,9 +10,49 @@ import discord
 import utils
 
 
+class Module:
+	author: int
+	path: Path
+	module: ModuleType
+	_name: str = None
+
+	def __init__( self, author: int, path: str ):
+		self.author = author
+		self.path = Path( path )
+		self.module = getModule( self.name, str( self.path ) )
+
+	def reload( self ):
+		spec = self.module.__spec__
+		# delete old event listeners
+		for evt in Modules.eventListeners.keys():
+			if f'{self.name}.py' in Modules.eventListeners[ evt ].keys():
+				del Modules.eventListeners[ evt ][ f'{self.name}.py' ]
+		self.module = importlib.util.module_from_spec( spec )
+		spec.loader.exec_module( self.module )
+
+	@property
+	def name(self):
+		if self._name is None:
+			self._name = self.path.name[:-3]
+		return self._name
+
+	def __eq__( self, other: Union[str, 'Module'] ):
+		if isinstance(other, Module):
+			if other is self:
+				return True
+			elif other.name == self.name and other.author == self.author:
+				return True
+			else:
+				return False
+		elif isinstance(other, str):
+			if other == self.name or other == self.path:
+				return True
+		return False
+
+
 class Modules:
 
-	modules: Dict[ str, List[ Union[ int, ModuleType ] ] ] = {}
+	modules: Dict[ str, Module ] = {}
 	bot = None
 	savedata: Dict[ str, List[ Union[ int, str ] ] ] = {}
 	commands: Dict[str, FunctionType] = {}
@@ -25,7 +65,7 @@ class Modules:
 		Modules.savedata = data['modules']
 		for name, mod in Modules.savedata.items():
 			try:
-				Modules.modules[name] = [ mod[0], getModule( name, mod[1] ) ]
+				Modules.modules[name] = Module( mod[0], mod[1] )
 			except BaseException as e:
 				print( f'caught {e.__class__.__name__} from module {name}, this module will not be available')
 			else:
@@ -63,9 +103,9 @@ class Modules:
 				)
 				return
 			# author check
-			if message.author.id not in (self.modules[ cmd[1] ][0], utils.enderzombi):
+			if message.author.id not in (self.modules[ cmd[1] ].author, utils.enderzombi):
 				await message.channel.send(
-					f'only {await message.guild.fetch_member( self.modules[ cmd[1] ][0] )} can delete this module'
+					f'only {await message.guild.fetch_member( self.modules[ cmd[1] ].author )} can delete this module'
 				)
 				return
 			os.remove( self.savedata[ cmd[1] ][1] )
@@ -126,7 +166,7 @@ class Modules:
 			modulename: str = cmd[1] if isCodeBlock else message.attachments[0].filename.replace('.py', '', 1)
 			if '\n' in modulename:
 				modulename = modulename.split('\n')[0]
-			path = f'./user-modules/{modulename + ".py"}'
+			modulepath = f'./user-modules/{modulename + ".py"}'
 
 			if cmd[0] == 'add':
 				# parameter check
@@ -136,17 +176,16 @@ class Modules:
 					await message.channel.send(f'module "{modulename}" already exist! use module update to update it')
 					return
 				if isCodeBlock:
-					saveCodeBlock( txt, path, modulename )
+					saveCodeBlock( txt, modulepath, modulename )
 				else:
-					await message.attachments[0].save(path)
+					await message.attachments[0].save(modulepath)
 				try:
-					module = getModule( modulename, path )
+					self.modules[ modulename ] = Module( message.author.id, modulepath )
+					self.savedata[ modulename ] = [ message.author.id, modulepath ]
+					await message.channel.send( f'module "{modulename}" successfully added' )
 				except Exception as e:
 					await utils.send( message, embed=utils.getTracebackEmbed(e) )
 					return
-				self.modules[ modulename ] = [ message.author.id, module ]
-				self.savedata[ modulename ] = [ message.author.id, path]
-				await message.channel.send(f'module "{modulename}" successfully added')
 
 			elif cmd[0] == 'update':
 				# parameter check
@@ -158,21 +197,21 @@ class Modules:
 					await message.channel.send(f'module "{modulename}" does not exist! use module add to add it')
 					return
 				# person check
-				if self.modules[ modulename ][0] != message.author.id:
+				if self.modules[ modulename ].author != message.author.id:
 					await message.channel.send( f"You're not the author of {modulename}!" )
 					return
 				if isCodeBlock:
-					saveCodeBlock( txt, path, modulename )
+					saveCodeBlock( txt, modulepath, modulename )
 				else:
-					await message.attachments[0].save(path)
+					await message.attachments[0].save(modulepath)
 				try:
-					module = getModule(modulename, path)
+					self.modules[ modulename ] = Module( message.author.id, modulepath )
+					self.savedata[ modulename ] = [ message.author.id, modulepath ]
+					await message.channel.send( f'module "{modulename}" successfully updated' )
 				except Exception as e:
 					await utils.send( message, embed=utils.getTracebackEmbed(e) )
 					return
-				self.modules[ modulename ] = [message.author.id, module]
-				self.savedata[ modulename ] = [message.author.id, path]
-				await message.channel.send(f'module "{modulename}" successfully updated')
+
 		# save everything
 		with open('./options', 'r') as file:
 			data = json.load(file)
@@ -203,13 +242,7 @@ class Modules:
 					await hdlr( **kwargs )
 
 	async def reload(self, module: str) -> None:
-		spec = self.modules[module][1].__spec__
-		# delete old event listeners
-		for evt in Modules.eventListeners.keys():
-			if f'{module}.py' in Modules.eventListeners[evt].keys():
-				del Modules.eventListeners[evt][f'{module}.py']
-		self.modules[module][1] = importlib.util.module_from_spec( spec )
-		spec.loader.exec_module( self.modules[module][1] )
+		self.modules[module].reload()
 
 
 def saveCodeBlock(text: str, path: str, modulename: str) -> None:
