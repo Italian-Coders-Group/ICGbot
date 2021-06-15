@@ -32,7 +32,11 @@ class Bot:
 			data = json.load(file)
 		Bot.prefix = data['bot']['prefix']
 		# init stuff
-		Bot.client = discord.Client()
+		indents = discord.Intents.all()
+		indents.members = True
+		Bot.client = discord.Client(
+			indents=indents
+		)
 		self.client.event( self.on_ready )
 		self.client.event( self.on_message )
 		self.client.event( self.on_member_join )

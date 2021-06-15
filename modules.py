@@ -157,6 +157,10 @@ class Modules:
 				if modulename not in self.modules.keys():
 					await message.channel.send(f'module "{modulename}" does not exist! use module add to add it')
 					return
+				# person check
+				if self.modules[ modulename ][0] != message.author.id:
+					await message.channel.send( f"You're not the author of {modulename}!" )
+					return
 				if isCodeBlock:
 					saveCodeBlock( txt, path, modulename )
 				else:
@@ -190,12 +194,13 @@ class Modules:
 
 	async def handleEvent( self, evt: Literal['memberJoin', 'memberLeave', 'memberUpdate', 'message', 'command'], **kwargs ):
 		if evt not in Modules.eventListeners:
-			print(f'no listeners for event {evt}')
+			if evt != 'message':
+				print(f'no listeners for event {evt}')
 		else:
 			for module in Modules.eventListeners[evt].values():
 				for hdlr in module:
 					print(f'{hdlr.__module__}.{hdlr.__name__} is handling event {evt}')
-					await hdlr( kwargs )
+					await hdlr( **kwargs )
 
 	async def reload(self, module: str) -> None:
 		spec = self.modules[module][1].__spec__
