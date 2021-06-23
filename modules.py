@@ -49,6 +49,15 @@ class Module:
 				return True
 		return False
 
+	@property
+	def __dict__( self ) -> Dict[ str, List[ Union[str, int] ] ]:
+		return {
+			self.name: [
+				self.author,
+				self.path
+			]
+		}
+
 
 class Modules:
 

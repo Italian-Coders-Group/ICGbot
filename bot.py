@@ -34,8 +34,9 @@ class Bot:
 		# init stuff
 		indents = discord.Intents.all()
 		indents.presences = False
+		# noinspection PyArgumentList
 		Bot.client = discord.Client(
-			indents=indents
+			intents=indents
 		)
 		self.client.event( self.on_ready )
 		self.client.event( self.on_message )
@@ -66,7 +67,7 @@ class Bot:
 		if not msg.content.startswith(self.prefix):
 			return
 		msg.content = msg.content.replace(self.prefix, '', 1)
-		cmd = msg.content.split(" ")
+		cmd = msg.content.split(' ')
 		print(f'command: {cmd[0]}, parameters: {cmd[ 1:len(cmd) ] if len(cmd) > 1 else None}, issuer: {msg.author.name}')
 		if msg.content.startswith('reload'):
 			await self.reload(msg)
